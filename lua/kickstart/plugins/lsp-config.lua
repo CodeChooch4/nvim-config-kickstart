@@ -23,8 +23,7 @@ return {
       'williamboman/mason-lspconfig.nvim',
       'WhoIsSethDaniel/mason-tool-installer.nvim',
 
-      -- Useful status updates for LSP.
-      { 'j-hui/fidget.nvim', opts = {} },
+      -- NOTE: Removed fidget.nvim - Neovim 0.10+ has native LSP progress handling
 
       -- Allows extra capabilities provided by nvim-cmp
       'hrsh7th/cmp-nvim-lsp',
@@ -145,10 +144,11 @@ return {
           -- code, if the language server you are using supports them
           --
           -- This may be unwanted, since they displace some of your code
+          -- NOTE: Categorized under <leader>tl for LSP toggles
           if client and client.supports_method(vim.lsp.protocol.Methods.textDocument_inlayHint) then
-            map('<leader>th', function()
+            map('<leader>tlh', function()
               vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled { bufnr = event.buf })
-            end, '[T]oggle Inlay [H]ints')
+            end, '[T]oggle [L]SP Inlay [H]ints')
           end
         end,
       })

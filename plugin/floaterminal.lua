@@ -55,4 +55,4 @@ end
 -- Create a floating window with default dimensions
 vim.api.nvim_create_user_command('Floaterminal', toggle_terminal, {})
 vim.keymap.set({ 'n', 't' }, '<leader>tt', toggle_terminal, { desc = '[T]oggle Floa[T]erminal' })
-vim.keymap.set('t', '<esc><esc><esc>', toggle_terminal, { desc = 'Exit Floa[T]erminal' })
+-- NOTE: Using <leader>tt in terminal mode for toggle, <Esc><Esc> exits terminal mode (see keymaps.lua)
