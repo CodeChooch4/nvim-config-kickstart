@@ -150,6 +150,46 @@ return {
               vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled { bufnr = event.buf })
             end, '[T]oggle [L]SP Inlay [H]ints')
           end
+
+          -- vtsls-specific keymaps (TypeScript/JavaScript)
+          if client and client.name == 'vtsls' then
+            local function code_action(kind)
+              return function()
+                vim.lsp.buf.code_action {
+                  context = { only = { kind }, diagnostics = {} },
+                  apply = true,
+                }
+              end
+            end
+            local function exec_command(command, arguments)
+              return function()
+                client:exec_cmd({
+                  command = command,
+                  arguments = arguments and arguments() or { vim.uri_from_bufnr(event.buf) },
+                }, { bufnr = event.buf })
+              end
+            end
+
+            map('<leader>tso', code_action 'source.organizeImports', 'TS Organize Imports')
+            map('<leader>tsa', code_action 'source.addMissingImports.ts', 'TS Add Missing Imports')
+            map('<leader>tsru', code_action 'source.removeUnused.ts', 'TS Remove Unused')
+            map('<leader>tsfa', code_action 'source.fixAll.ts', 'TS Fix All')
+            map('<leader>tsD', exec_command('typescript.goToSourceDefinition', function()
+              local pos = vim.lsp.util.make_position_params(0, client.offset_encoding)
+              return { pos.textDocument.uri, pos.position }
+            end), 'TS Go To Source Definition')
+            map('<leader>tsrf', function()
+              local old = vim.api.nvim_buf_get_name(event.buf)
+              vim.ui.input({ prompt = 'New path: ', default = old, completion = 'file' }, function(new)
+                if not new or new == '' or new == old then return end
+                client:exec_cmd({
+                  command = 'typescript.renameFile',
+                  arguments = { vim.uri_from_fname(old), vim.uri_from_fname(new) },
+                }, { bufnr = event.buf })
+              end)
+            end, 'TS Rename File')
+            map('<leader>tsfr', exec_command 'typescript.findAllFileReferences', 'TS File References')
+          end
         end,
       })
 
@@ -181,6 +221,40 @@ return {
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
       local servers = {
         eslint_d = {},
+        vtsls = {
+          settings = {
+            typescript = {
+              inlayHints = {
+                parameterNames = { enabled = 'literals' },
+                parameterTypes = { enabled = true },
+                variableTypes = { enabled = true },
+                propertyDeclarationTypes = { enabled = true },
+                functionLikeReturnTypes = { enabled = true },
+                enumMemberValues = { enabled = true },
+              },
+              preferences = {
+                importModuleSpecifier = 'shortest',
+              },
+              updateImportsOnFileMove = { enabled = 'always' },
+            },
+            javascript = {
+              inlayHints = {
+                parameterNames = { enabled = 'literals' },
+                parameterTypes = { enabled = true },
+                variableTypes = { enabled = true },
+                propertyDeclarationTypes = { enabled = true },
+                functionLikeReturnTypes = { enabled = true },
+                enumMemberValues = { enabled = true },
+              },
+            },
+            vtsls = {
+              autoUseWorkspaceTsdk = true,
+              experimental = {
+                completion = { enableServerSideFuzzyMatch = true },
+              },
+            },
+          },
+        },
         tailwindcss = {
           filetypes = {
             'html',
@@ -261,50 +335,6 @@ return {
         },
       }
 
-      -- Ensure Tailwind CSS LSP attaches to TypeScript files alongside typescript-tools
-      vim.api.nvim_create_autocmd("FileType", {
-        pattern = { "typescriptreact", "typescript", "javascriptreact", "javascript" },
-        callback = function()
-          -- Small delay to let typescript-tools attach first
-          vim.defer_fn(function()
-            local clients = vim.lsp.get_clients({ bufnr = 0, name = "tailwindcss" })
-            if #clients == 0 then
-              -- Check if we have a tailwind config file in the project
-              local root_dir = vim.fs.find({ "tailwind.config.js", "tailwind.config.ts", "tailwind.config.cjs", "package.json" }, { upward = true })[1]
-              if root_dir then
-                root_dir = vim.fs.dirname(root_dir)
-                -- Manually start Tailwind LSP
-                vim.lsp.start({
-                  name = "tailwindcss",
-                  cmd = { vim.fn.expand("~/.local/share/nvim/mason/bin/tailwindcss-language-server"), "--stdio" },
-                  root_dir = root_dir,
-                  filetypes = { "html", "css", "scss", "javascript", "javascriptreact", "typescript", "typescriptreact", "vue", "svelte", "astro" },
-                  settings = {
-                    tailwindCSS = {
-                      experimental = {
-                        classRegex = {
-                          "tw`([^`]*)",
-                          "tw=\"([^\"]*)",
-                          "tw={\"([^\"}]*)",
-                          "tw\\.\\w+`([^`]*)",
-                          "tw\\(.*?\\)`([^`]*)",
-                          'class[:]\\s*"([^"]*)"',
-                          'className[:]\\s*"([^"]*)"',
-                        },
-                      },
-                      includeLanguages = {
-                        typescript = "javascript",
-                        typescriptreact = "javascript",
-                        ["typescript.tsx"] = "javascript",
-                      },
-                    },
-                  },
-                })
-              end
-            end
-          end, 100)
-        end,
-      })
     end,
   },
 }
