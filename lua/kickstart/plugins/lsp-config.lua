@@ -220,7 +220,6 @@ return {
       --  - settings (table): Override the default settings passed when initializing the server.
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
       local servers = {
-        eslint_d = {},
         vtsls = {
           settings = {
             typescript = {
@@ -291,7 +290,6 @@ return {
           },
         },
         prismals = {},
-        prettierd = {},
         lua_ls = {
           settings = {
             Lua = {
@@ -318,7 +316,9 @@ return {
       -- for you, so that they are available from within Neovim.
       local ensure_installed = vim.tbl_keys(servers or {})
       vim.list_extend(ensure_installed, {
-        'stylua', -- Used to format Lua code
+        'stylua',     -- Lua formatter
+        'prettierd',  -- JS/TS formatter daemon (used by conform)
+        'eslint_d',   -- ESLint daemon (used by conform/diagnostics)
       })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
