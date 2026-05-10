@@ -8,7 +8,7 @@ return {
       local parsers = {
         'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline',
         'query', 'vim', 'vimdoc',
-        'css', 'scss', 'javascript', 'typescript', 'tsx', 'json', 'jsonc',
+        'css', 'scss', 'javascript', 'typescript', 'tsx', 'json',
         'vue', 'svelte', 'astro',
         'yaml', 'toml', 'dockerfile', 'gitignore',
       }
@@ -17,6 +17,9 @@ return {
 
       -- Use the tsx parser for JSX buffers too.
       vim.treesitter.language.register('tsx', { 'javascriptreact' })
+
+      -- jsonc parser was removed from nvim-treesitter main; reuse json.
+      vim.treesitter.language.register('json', { 'jsonc' })
 
       local filetypes = {
         'bash', 'sh', 'zsh',
