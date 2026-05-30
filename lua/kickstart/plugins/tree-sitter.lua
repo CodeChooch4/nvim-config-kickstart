@@ -11,6 +11,7 @@ return {
         'css', 'scss', 'javascript', 'typescript', 'tsx', 'json',
         'vue', 'svelte', 'astro',
         'yaml', 'toml', 'dockerfile', 'gitignore',
+        'prisma',
       }
 
       require('nvim-treesitter').install(parsers)
@@ -36,6 +37,7 @@ return {
         'vue', 'svelte', 'astro',
         'yaml', 'toml',
         'dockerfile', 'gitignore',
+        'prisma',
       }
 
       vim.api.nvim_create_autocmd('FileType', {
