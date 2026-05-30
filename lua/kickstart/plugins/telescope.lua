@@ -61,6 +61,12 @@ return {
         --     i = { ['<c-enter>'] = 'to_fuzzy_refine' },
         --   },
         -- },
+        defaults = {
+          -- nvim-treesitter main branch removed the legacy Lua API
+          -- (parsers.ft_to_lang, configs.is_enabled) that telescope's previewer
+          -- still calls. Fall back to vim regex syntax until upstream catches up.
+          preview = { treesitter = false },
+        },
         -- pickers = {}
         extensions = {
           ['ui-select'] = {
